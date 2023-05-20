@@ -18,6 +18,9 @@ def hello_world():
 @cross_origin(origin='*')
 def get_medicine_details():
     data_json = request.get_json(force=True)
+    mail = data_json['mail']
+    kpi = db.get_kpi(mail)
+    return jsonify(kpi)
 
 
 # create a post api to upload email, total_sale_and_marketing, total_revenu, "total_cust, user_stopped, cogs into the kpi_table"
