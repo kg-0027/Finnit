@@ -38,7 +38,7 @@ def create_kpi():
                            total_revenue, total_cust, user_stopped, cogs)
     return jsonify(result)
 
-# create a post api to upload email, total_sale_and_marketing, total_revenu, "total_cust, user_stopped, cogs into the kpi_table"
+
 @app.route('/burn_rate/create', methods=["POST"])
 @cross_origin(origin='*')
 def create_burn():
@@ -57,14 +57,36 @@ def create_burn():
                            miscellaneous, marketing, operation, cogs, investment,bootstrap, revenue)
     return jsonify(result)
 
-# get values from KPIs Table
-@app.route('/burn_rate/getall', methods=["POST"])
+
+@app.route('/burn_rate/get', methods=["POST"])
 @cross_origin(origin='*')
-def get_burn():
+def get_brun_rate():
     data_json = request.get_json(force=True)
     mail = data_json['mail']
-    time = db.get_burn(mail)
-    return jsonify(time)
+    burnrate = db.get_burn(mail)
+    return jsonify(burnrate)
+
+
+@app.route('/break_even/create', methods=["POST"])
+@cross_origin(origin='*')
+def create_breakeven():
+    data_json = request.get_json(force=True)
+    mail = data_json['mail']
+    fixed_cost = data_json['fixed_cost']
+    variable_cost = data_json['variable_cost']
+    selling_price = data_json['selling_price']
+    result = db.create_break(mail, fixed_cost, variable_cost, selling_price)
+    return jsonify(result)
+
+
+
+@app.route('/break_even/get', methods=["POST"])
+@cross_origin(origin='*')
+def get_breakeven():
+    data_json = request.get_json(force=True)
+    mail = data_json['mail']
+    breakeven = db.get_break(mail)
+    return jsonify(breakeven)
 
 
 if __name__ == "__main__":

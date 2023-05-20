@@ -104,6 +104,36 @@ class ItemDatabase:
         
         net_burnrate = outflow - inflow
         cash_left = investment + bootstrap - net_burnrate
-        time_in_months = cash_left/net_burnrate
-        return time_in_months
-
+        burnrate={}
+        burnrate["time_in_months"] = cash_left/net_burnrate
+        return [burnrate]
+    
+    def create_break(self, mail, fixed_cost, variable_cost, selling_price):
+        query = f"SELECT * FROM break_even WHERE email = '{mail}'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        if len(result) == 0:
+            query = f"INSERT INTO break_even (email, fixed_cost, variable_cost, selling_price) VALUES ('{mail}', {fixed_cost}, {variable_cost}, {selling_price})"
+            self.cursor.execute(query)
+            self.mydb.commit()
+            return "successfully created"
+        else:
+            query = f"UPDATE break_even SET fixed_cost = {fixed_cost}, variable_cost =  {variable_cost}, selling_price = {selling_price} WHERE email = '{mail}'"
+            self.cursor.execute(query)
+            self.mydb.commit()
+            return "successfully updated"
+        
+    def get_break(self, mail):
+        query = f"SELECT * FROM break_even WHERE email = '{mail}'"
+        self.cursor.execute(query)
+        for row in self.cursor.fetchall():
+            mail = row[0]
+            fixed_cost = row[1]
+            variable_cost = row[2]
+            selling_price = row[3]
+        
+        contri_mpu = selling_price - variable_cost #contribution in margin per user
+        breakeven = {}
+        breakeven["be_users"] = fixed_cost/contri_mpu #breakeven point (in users)
+        breakeven["be_revenue"] = breakeven["be_users"] * selling_price
+        return [breakeven]
