@@ -30,7 +30,7 @@ class ItemDatabase:
         if(total_customer== None):
             kpi["cac"] = None
             kpi["churn_rate"] = None
-            avg_rpc = None
+            kpi["avg_rpc"] = None
             kpi["clv"] = None
 
         if(total_sale_and_marketing == None):
@@ -45,15 +45,15 @@ class ItemDatabase:
             kpi["churn_rate"] = user_stopped/total_customer
 
         if(total_revenue==None):
-            avg_rpc = None
+            kpi["avg_rpc"] = None
             kpi["gross_margin"] = None
             kpi["clv"] = None
         else:
             kpi["gross_margin"] = (total_revenue-cogs)/(total_revenue*100)
-            avg_rpc = total_revenue/total_customer
+            kpi["avg_rpc"] = total_revenue/total_customer
 
-        if(avg_rpc!=None and kpi["churn_rate"]!=None):
-            kpi["clv"] = avg_rpc/kpi["churn_rate"]
+        if(kpi["avg_rpc"]!=None and kpi["churn_rate"]!=None):
+            kpi["clv"] = kpi["avg_rpc"]/kpi["churn_rate"]
 
         return [kpi]
 
@@ -73,3 +73,37 @@ class ItemDatabase:
             self.cursor.execute(query)
             self.mydb.commit()
             return "successfully updated"
+        
+
+    def create_burn(self, mail, salaries, miscellaneous, marketing, operation, cogs, investment, bootstrap, revenue):
+        outflow = salaries + miscellaneous + marketing + operation + cogs
+        inflow = revenue
+        query = f"SELECT * FROM burn_rate WHERE email = '{mail}'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        if len(result) == 0:
+            query = f"INSERT INTO burn_rate (email, salaries, miscellaneous, marketing, operations, cogs, cash_outflow, investment, bootstrap, revenue, cash_inflow) VALUES ('{mail}', {salaries}, {miscellaneous}, {marketing}, {operation}, {cogs}, {outflow}, {investment}, {bootstrap}, {revenue}, {inflow})"
+            self.cursor.execute(query)
+            self.mydb.commit()
+            return "successfully created"
+        else:
+            query = f"UPDATE burn_rate SET salaries = {salaries}, miscellaneous = {miscellaneous}, marketing =  {marketing}, operations = {operation}, cogs = {cogs}, cash_outflow = {outflow}, investment = {investment}, bootstrap = {bootstrap}, revenue = {revenue}, cash_inflow = {inflow} WHERE email = '{mail}'"
+            self.cursor.execute(query)
+            self.mydb.commit()
+            return "successfully updated"
+
+    def get_burn(self, mail):
+        query = f"SELECT * FROM burn_rate WHERE email = '{mail}'"
+        self.cursor.execute(query)
+        for row in self.cursor.fetchall():
+            mail = row[0]
+            outflow = row[6]
+            investment = row[7]
+            bootstrap = row[8]
+            inflow = row[10]
+        
+        net_burnrate = outflow - inflow
+        cash_left = investment + bootstrap - net_burnrate
+        time_in_months = cash_left/net_burnrate
+        return time_in_months
+
