@@ -106,6 +106,8 @@ class ItemDatabase:
         cash_left = investment + bootstrap - net_burnrate
         burnrate={}
         burnrate["time_in_months"] = cash_left/net_burnrate
+        if(burnrate["time_in_months"] < 0.30):
+            burnrate['time_in_days'] = burnrate["time_in_months"]*30
         return [burnrate]
     
     def create_break(self, mail, fixed_cost, variable_cost, selling_price):
