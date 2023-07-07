@@ -8,7 +8,7 @@ class ItemDatabase:
         self.mydb = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="@27September2000",
+            password="",
             database="Finnit"
         )
         self.cursor = self.mydb.cursor()
